@@ -1,0 +1,9 @@
+.env
+__pycache__/
+olist_lifecycle.py
+README.md
+data/
+datasets/
+dbt/logs/
+dbt/target/
+dbt/.user.yml
