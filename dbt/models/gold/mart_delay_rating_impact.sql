@@ -4,6 +4,7 @@ with order_level as (
         delay_days,
         review_score
     from {{ ref('fact_orders') }}
+    where review_score is not null
 )
 select
     case

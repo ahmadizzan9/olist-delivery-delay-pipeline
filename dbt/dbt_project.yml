@@ -6,9 +6,12 @@ model-paths: ["models"]
 
 models:
   olist_project:
-    staging:
+    bronze:
       +materialized: view
-      +schema: staging
-    marts:
+      +schema: bronze
+    silver:
       +materialized: table
-      +schema: marts
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold

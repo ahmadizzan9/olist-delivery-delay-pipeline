@@ -1,12 +1,13 @@
-version: "3.8"
-
 x-airflow-common: &airflow-common
-  image: apache/airflow:2.9.3
+  build:
+    context: .
   environment:
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-    _PIP_ADDITIONAL_REQUIREMENTS: pandas psycopg2-binary boto3 kaggle apache-airflow-providers-docker
+    KAGGLE_USERNAME: ${KAGGLE_USERNAME}
+    KAGGLE_API_TOKEN: ${KAGGLE_API_TOKEN}
+    POSTGRES_PORT: ${POSTGRES_PORT}
   volumes:
     - ./dbt:/usr/app/dbt
     - ./dags:/opt/airflow/dags
@@ -77,7 +78,7 @@ services:
       postgres:
         condition: service_healthy
     entrypoint: []
-    command: tail -f /dev/null # supaya container idle, dijalankan via 'docker compose run dbt ...'
+    command: tail -f /dev/null # supaya container idle, dijalankan via 'docker compose exec dbt ...'
 
   metabase:
     image: metabase/metabase
@@ -90,6 +91,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+networks:
+  default:
+    name: olist_net
 
 volumes:
   postgres_data:

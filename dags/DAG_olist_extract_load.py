@@ -17,7 +17,7 @@ def download_ds():
     if os.path.exists(DATASET_DIR) and os.listdir(DATASET_DIR):
         print("Dataset exist, skip download.")
         return
-
+    
     os.makedirs(DATASET_DIR, exist_ok=True)
     zip_path = f"{DATASET_DIR}/olist.zip"
     url = "https://www.kaggle.com/api/v1/datasets/download/olistbr/brazilian-ecommerce"
@@ -45,6 +45,7 @@ def olist_ds():
     reviews = pd.read_csv(f"{DATASET_DIR}/olist_order_reviews_dataset.csv")
     sellers = pd.read_csv(f"{DATASET_DIR}/olist_sellers_dataset.csv")
     customers = pd.read_csv(f"{DATASET_DIR}/olist_customers_dataset.csv")
+    
     return orders, order_items, reviews, sellers, customers
 
 def load_ds(df, table_name):
@@ -53,7 +54,7 @@ def load_ds(df, table_name):
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS raw"))
         conn.execute(text(f"DROP TABLE IF EXISTS raw.{table_name} CASCADE"))
         
-        df.to_sql(table_name, con=conn, schema="raw", if_exists="append", index=False)
+        df.to_s ql(table_name, con=conn, schema="raw", if_exists="append", index=False)
 
 def extract_and_load():
     olist = olist_ds()
@@ -64,7 +65,7 @@ def extract_and_load():
     load_ds(olist[4], "raw_customers")
 
 with DAG(
-    dag_id="olist_delivery_performance",
+    dag_id="olist_extract_load",
     start_date=pd.Timestamp("2026-1-1"),
     schedule_interval=None,
     catchup=False,
@@ -76,19 +77,21 @@ with DAG(
         task_id = "Download_Dataset",
         python_callable = download_ds
     )
+    
     extract_load_task = PythonOperator(
         task_id = "Extract_and_Load",
         python_callable = extract_and_load
     )
-    dbt_task = DockerOperator(
-        task_id     ="Run_DBT",
+
+    dbt_bronze_task  = DockerOperator(
+        task_id     ="dbt_bronze",
         image       ="olist-dbt:1.0",
-        command     ="dbt run",
+        command     ="dbt run --select path:models/bronze",
         docker_url  ="unix://var/run/docker.sock",
-        network_mode="delivery_performance_tracking_default",
+        network_mode="olist_net",
         mounts=[
             {
-                "source": "D:/@Important_stuff/Dibimbing-DE-Bootcamp/FINAL/delivery_performance_tracking/dbt",
+                "source": "D:/@Important_stuff/Dibimbing-DE-Bootcamp/FINAL/delivery_batch_pipeline/dbt",
                 "target": "/usr/app/dbt",   
                 "type"  : "bind",
             }
@@ -101,4 +104,4 @@ with DAG(
 
     end_task = EmptyOperator(task_id="End")
 
-    start_task >> download_task >> extract_load_task >> dbt_task >> end_task
+    start_task >> download_task >> extract_load_task >> dbt_bronze_task >> end_task
