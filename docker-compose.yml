@@ -68,6 +68,8 @@ services:
 
   dbt:
     image: olist-dbt:1.0
+    ports:
+      - "8085:8080"
     build:
       context: ./dbt
     volumes:

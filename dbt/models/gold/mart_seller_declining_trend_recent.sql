@@ -26,6 +26,8 @@ SELECT
 FROM months
 WHERE late_rate_1m_ago IS NOT NULL
   AND late_rate_2m_ago IS NOT NULL
+  AND late_rate_1m_ago > 0
+  AND late_rate_2m_ago > 0
   AND AGE(current_period, period_1m_ago) = INTERVAL '1 month' 
   AND AGE(period_1m_ago, period_2m_ago) = INTERVAL '1 month' 
   AND late_rate > late_rate_1m_ago

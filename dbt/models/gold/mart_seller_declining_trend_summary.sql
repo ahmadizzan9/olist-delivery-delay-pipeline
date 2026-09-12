@@ -17,6 +17,8 @@ flagged AS (
     FROM months
     WHERE late_rate_1m_ago IS NOT NULL
       AND late_rate_2m_ago IS NOT NULL
+      AND late_rate_1m_ago > 0 
+      AND late_rate_2m_ago > 0
       AND AGE (current_period, period_1m_ago) = INTERVAL '1 month'
       AND AGE (period_1m_ago, period_2m_ago) = INTERVAL '1 month'
       AND late_rate > late_rate_1m_ago
@@ -27,7 +29,7 @@ flagged AS (
 )
 SELECT
     date_trunc('quarter', current_period)::date AS quarter,
-    COUNT(DISTINCT seller_id) AS n_sellers_declining
+    COUNT(DISTINCT seller_id) AS total_sellers_declining
 FROM flagged
 GROUP BY 1
 ORDER BY 1

@@ -54,7 +54,7 @@ def load_ds(df, table_name):
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS raw"))
         conn.execute(text(f"DROP TABLE IF EXISTS raw.{table_name} CASCADE"))
         
-        df.to_s ql(table_name, con=conn, schema="raw", if_exists="append", index=False)
+        df.to_sql(table_name, con=conn, schema="raw", if_exists="append", index=False)
 
 def extract_and_load():
     olist = olist_ds()

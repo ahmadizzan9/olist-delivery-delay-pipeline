@@ -1,8 +1,5 @@
 .env
 __pycache__/
-testing_code.py
-README.md
-data/
 datasets/
 dbt/logs/
 dbt/target/
